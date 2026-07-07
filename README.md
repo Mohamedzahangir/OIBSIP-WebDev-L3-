@@ -21,8 +21,8 @@
 ### 4. Portals & Secure Authentication
 *Separate secure login portals for users and admin accounts.*
 <p align="center">
-  <img src="./screenshots/login.png" width="48%" />
-  <img src="./screenshots/admin_login.png" width="48%" />
+  <img src="./screenshots/login.png" />
+  
 </p>
 
 ---
