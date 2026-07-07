@@ -63,7 +63,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ 
       message: 'Registration successful! Verification email sent.',
-      previewUrl: mailRes || null 
+      previewUrl: (mailRes && mailRes.previewUrl) || null 
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error during registration', error: error.message });
@@ -186,7 +186,7 @@ router.post('/forgot-password', async (req, res) => {
 
     res.json({
       message: 'If that email is registered, a password reset link has been sent.',
-      previewUrl: mailRes || null
+      previewUrl: (mailRes && mailRes.previewUrl) || null
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error during forgot password', error: error.message });

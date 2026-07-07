@@ -68,7 +68,9 @@ mongoose.connect(mongoUri)
   });
 
 const { initCron } = require('./utils/cron');
+const { initEmailTransporter } = require('./utils/email');
 initCron();
+initEmailTransporter();
 
 const authRoutes = require('./routes/auth');
 const inventoryRoutes = require('./routes/inventory');

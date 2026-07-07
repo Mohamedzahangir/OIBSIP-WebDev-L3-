@@ -7,8 +7,9 @@ function VerifyEmail() {
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
 
+  const token = searchParams.get('token');
+
   useEffect(() => {
-    const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
       setMessage('Verification token is missing.');
@@ -35,7 +36,7 @@ function VerifyEmail() {
     };
 
     verifyToken();
-  }, [searchParams]);
+  }, [token]);
 
   return (
     <div className="auth-wrapper">

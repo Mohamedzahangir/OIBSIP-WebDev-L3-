@@ -75,4 +75,12 @@ async function sendEmail({ to, subject, text, html }) {
   }
 }
 
-module.exports = { sendEmail };
+async function initEmailTransporter() {
+  try {
+    await getTransporter();
+  } catch (err) {
+    console.error('Failed to pre-initialize email transporter:', err);
+  }
+}
+
+module.exports = { sendEmail, initEmailTransporter };
