@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getApiUrl } from '../utils/api';
 
 function OrderSummary() {
   const { token, user } = useAuth();
@@ -41,7 +42,7 @@ function OrderSummary() {
     setLoading(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = getApiUrl();
       
       const response = await fetch(`${apiUrl}/api/orders`, {
         method: 'POST',
@@ -128,7 +129,7 @@ function OrderSummary() {
     setShowSimulator(false);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = getApiUrl();
       const verifyRes = await fetch(`${apiUrl}/api/orders/mock-payment`, {
         method: 'POST',
         headers: {

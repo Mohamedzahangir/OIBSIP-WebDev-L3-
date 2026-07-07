@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { getApiUrl } from '../utils/api';
 
 const SocketContext = createContext(null);
 
@@ -17,14 +18,13 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const socketUrl = getApiUrl();
     const newSocket = io(socketUrl, {
       auth: { token }
     });
 
     newSocket.on('connect', () => {
       console.log('Socket.io client connected. Socket ID:', newSocket.id);
-      // Let server know we want to join our specific user room
       newSocket.emit('join-user-room', user.id);
     });
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getApiUrl } from '../utils/api';
 
 const BASE_CUSTOM_PRICE = 100;
 
@@ -59,7 +60,7 @@ function CustomPizzaBuilder() {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const apiUrl = getApiUrl();
         const res = await fetch(`${apiUrl}/api/inventory`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });

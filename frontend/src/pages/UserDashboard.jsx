@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { getApiUrl } from '../utils/api';
 
 function UserDashboard() {
   const { token, user } = useAuth();
@@ -17,7 +18,7 @@ function UserDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const apiUrl = getApiUrl();
         
         const pizzasRes = await fetch(`${apiUrl}/api/pizzas`);
         if (pizzasRes.ok) {

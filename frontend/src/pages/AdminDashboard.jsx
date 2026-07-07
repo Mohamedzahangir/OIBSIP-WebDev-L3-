@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { getApiUrl } from '../utils/api';
 
 function AdminDashboard() {
   const { token } = useAuth();
@@ -21,7 +22,7 @@ function AdminDashboard() {
     setError('');
     setSuccess('');
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = getApiUrl();
       
       const ordersRes = await fetch(`${apiUrl}/api/orders`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -81,7 +82,7 @@ function AdminDashboard() {
     setError('');
     setSuccess('');
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: {
@@ -114,7 +115,7 @@ function AdminDashboard() {
     }
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/api/inventory/${itemId}`, {
         method: 'PUT',
         headers: {
