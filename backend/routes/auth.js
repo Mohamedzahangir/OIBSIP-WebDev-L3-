@@ -37,7 +37,9 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     // Send verification email
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const origin = `${protocol}://${req.get('host')}`;
+    const frontendUrl = process.env.FRONTEND_URL || origin;
     const verifyLink = `${frontendUrl}/verify-email?token=${token}`;
     
     const subject = '🍕 Verify your PizzaApp account!';
@@ -61,7 +63,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ 
       message: 'Registration successful! Verification email sent.',
-      previewUrl: mailRes.previewUrl || null 
+      previewUrl: mailRes || null 
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error during registration', error: error.message });
@@ -158,7 +160,9 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
     await user.save();
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const origin = `${protocol}://${req.get('host')}`;
+    const frontendUrl = process.env.FRONTEND_URL || origin;
     const resetLink = `${frontendUrl}/reset-password?token=${token}`;
 
     const subject = '🍕 Reset your PizzaApp password';
@@ -182,7 +186,7 @@ router.post('/forgot-password', async (req, res) => {
 
     res.json({
       message: 'If that email is registered, a password reset link has been sent.',
-      previewUrl: mailRes.previewUrl || null
+      previewUrl: mailRes || null
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error during forgot password', error: error.message });
