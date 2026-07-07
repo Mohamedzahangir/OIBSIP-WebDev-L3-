@@ -109,16 +109,11 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    if (!user.isVerified) {
-      return res.status(403).json({ message: 'Please verify your email address before logging in' });
-    }
-
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // Generate JWT
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET || 'super_pizza_secret_key_12345',
@@ -131,7 +126,8 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isVerified: user.isVerified
       }
     });
   } catch (error) {
@@ -256,11 +252,61 @@ router.post('/admin-login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isVerified: user.isVerified
       }
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error during admin login', error: error.message });
+  }
+});
+
+const { authMiddleware } = require('../middleware/authMiddleware');
+
+router.post('/resend-verification', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Email is already verified' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
+
+    user.verificationToken = token;
+    user.verificationTokenExpires = tokenExpiry;
+    await user.save();
+
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const origin = `${protocol}://${req.get('host')}`;
+    const frontendUrl = process.env.FRONTEND_URL || origin;
+    const verifyLink = `${frontendUrl}/verify-email?token=${token}`;
+
+    const subject = '🍕 Verify your PizzaApp account!';
+    const text = `Hi ${user.name},\n\nPlease verify your email by clicking the link: ${verifyLink}\n\nThis link is valid for 24 hours.`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+        <h2 style="color: #d9534f; border-bottom: 2px solid #d9534f; padding-bottom: 10px; text-align: center;">🍕 Welcome to PizzaApp!</h2>
+        <p>Hi ${user.name},</p>
+        <p>Please click the button below to verify your email address:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verifyLink}" style="background-color: #d9534f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">Verify Email Address</a>
+        </div>
+        <p style="font-size: 12px; color: #d9534f; word-break: break-all;">${verifyLink}</p>
+      </div>
+    `;
+
+    const mailRes = await sendEmail({ to: user.email, subject, text, html });
+
+    res.json({
+      message: 'Verification email resent successfully!',
+      previewUrl: (mailRes && mailRes.previewUrl) || null
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error resending verification email', error: error.message });
   }
 });
 

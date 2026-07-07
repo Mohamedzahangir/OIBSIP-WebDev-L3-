@@ -25,6 +25,16 @@ function VerifyEmail() {
         if (response.ok) {
           setStatus('success');
           setMessage(data.message || 'Email verified successfully!');
+          const storedUser = localStorage.getItem('pizza_user');
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              parsedUser.isVerified = true;
+              localStorage.setItem('pizza_user', JSON.stringify(parsedUser));
+            } catch (e) {
+              console.error(e);
+            }
+          }
         } else {
           setStatus('error');
           setMessage(data.message || 'Verification failed. Token may have expired.');

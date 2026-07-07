@@ -15,6 +15,41 @@ function UserDashboard() {
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [error, setError] = useState('');
 
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
+  const [resendError, setResendError] = useState('');
+  const [resendEtherealUrl, setResendEtherealUrl] = useState('');
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    setResendMessage('');
+    setResendError('');
+    setResendEtherealUrl('');
+    try {
+      const apiUrl = getApiUrl();
+      const res = await fetch(`${apiUrl}/api/auth/resend-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setResendMessage(data.message || 'Verification link sent successfully!');
+        if (data.previewUrl) {
+          setResendEtherealUrl(data.previewUrl);
+        }
+      } else {
+        setResendError(data.message || 'Failed to resend verification.');
+      }
+    } catch (err) {
+      setResendError('Network error resending verification.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -104,6 +139,37 @@ function UserDashboard() {
           <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontFamily: 'var(--font-display)' }}>Welcome back, {user?.name}! 👋</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Explore our varieties or create your own custom masterpiece.</p>
         </div>
+
+        {user && !user.isVerified && (
+          <div className="alert alert-warning" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', border: '1px solid rgba(241, 196, 15, 0.4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <strong>📧 Email Address Unverified</strong>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                  Please verify your email address to secure your account.
+                </p>
+              </div>
+              <button 
+                className="btn btn-primary" 
+                style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', background: '#e67e22', borderColor: '#e67e22' }} 
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+              >
+                {resendLoading ? 'Sending...' : 'Resend Verification Link'}
+              </button>
+            </div>
+            
+            {resendError && <div style={{ color: '#e74c3c', fontSize: '0.85rem' }}>❌ {resendError}</div>}
+            {resendMessage && <div style={{ color: '#2ecc71', fontSize: '0.85rem' }}>✓ {resendMessage}</div>}
+            {resendEtherealUrl && (
+              <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
+                <a href={resendEtherealUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '0.3rem 0.75rem' }}>
+                  Open Ethereal Mail Inbox 📬
+                </a>
+              </div>
+            )}
+          </div>
+        )}
 
         {error && <div className="alert alert-danger">{error}</div>}
 
